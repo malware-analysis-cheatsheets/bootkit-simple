@@ -29,7 +29,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -85,7 +85,8 @@
       <WarningLevel>Level3</WarningLevel>
       <DisableSpecificWarnings>4091</DisableSpecificWarnings>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <AdditionalOptions>/Oi- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/Oi- /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Lib>
       <SubSystem>EFI Application</SubSystem>
@@ -105,7 +106,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bootmgfw.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="Print.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Bootmgfw.h" />
+    <ClInclude Include="Print.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

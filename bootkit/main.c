@@ -1,133 +1,75 @@
-/*
- * UEFI:SIMPLE - UEFI development made easy
- * Copyright ©️ 2014-2023 Pete Batard <pete@akeo.ie> - Public Domain
- * See COPYING for the full licensing terms.
- */
+﻿#include "Print.h"
+#include "Bootmgfw.h"
+
 #include <efi.h>
 #include <efilib.h>
-#include <libsmbios.h>
 
-#if defined(_M_X64) || defined(__x86_64__)
-static CHAR16* ArchName = L"x86 64-bit";
-#elif defined(_M_IX86) || defined(__i386__)
-static CHAR16* ArchName = L"x86 32-bit";
-#elif defined (_M_ARM64) || defined(__aarch64__)
-static CHAR16* ArchName = L"ARM 64-bit";
-#elif defined (_M_ARM) || defined(__arm__)
-static CHAR16* ArchName = L"ARM 32-bit";
-#elif defined (_M_RISCV64) || (defined(__riscv) && (__riscv_xlen == 64))
-static CHAR16* ArchName = L"RISC-V 64-bit";
-#else
-#  error Unsupported architecture
-#endif
-
- // Tri-state status for Secure Boot: -1 = Setup, 0 = Disabled, 1 = Enabled
-INTN SecureBootStatus = 0;
-
-/*
- * Query SMBIOS to display some info about the system hardware and UEFI firmware.
- * Also display the current Secure Boot status.
- */
-static EFI_STATUS PrintSystemInfo(VOID)
-{
-    EFI_STATUS Status;
-    SMBIOS_STRUCTURE_POINTER Smbios;
-    SMBIOS_STRUCTURE_TABLE* SmbiosTable;
-    SMBIOS3_STRUCTURE_TABLE* Smbios3Table;
-    UINT8 Found = 0, * Raw, * SecureBoot, * SetupMode;
-    UINTN MaximumSize, ProcessedSize = 0;
-
-    Print(L"UEFI v%d.%d (%s, 0x%08X)\n", gST->Hdr.Revision >> 16, gST->Hdr.Revision & 0xFFFF,
-        gST->FirmwareVendor, gST->FirmwareRevision);
-
-    Status = LibGetSystemConfigurationTable(&gEfiSmbios3TableGuid, (VOID**)&Smbios3Table);
-    if (Status == EFI_SUCCESS)
-    {
-        Smbios.Hdr = (SMBIOS_HEADER*)Smbios3Table->TableAddress;
-        MaximumSize = (UINTN)Smbios3Table->TableMaximumSize;
-    }
-    else
-    {
-        Status = LibGetSystemConfigurationTable(&SMBIOSTableGuid, (VOID**)&SmbiosTable);
-        if (EFI_ERROR(Status))
-            return EFI_NOT_FOUND;
-        Smbios.Hdr = (SMBIOS_HEADER*)(UINTN)SmbiosTable->TableAddress;
-        MaximumSize = (UINTN)SmbiosTable->TableLength;
-    }
-
-    while ((Smbios.Hdr->Type != 0x7F) && (Found < 2))
-    {
-        Raw = Smbios.Raw;
-        if (Smbios.Hdr->Type == 0)
-        {
-            Print(L"%a %a\n", LibGetSmbiosString(&Smbios, Smbios.Type0->Vendor),
-                LibGetSmbiosString(&Smbios, Smbios.Type0->BiosVersion));
-            Found++;
-        }
-        if (Smbios.Hdr->Type == 1)
-        {
-            Print(L"%a %a\n", LibGetSmbiosString(&Smbios, Smbios.Type1->Manufacturer),
-                LibGetSmbiosString(&Smbios, Smbios.Type1->ProductName));
-            Found++;
-        }
-        LibGetSmbiosString(&Smbios, -1);
-        ProcessedSize += (UINTN)Smbios.Raw - (UINTN)Raw;
-        if (ProcessedSize > MaximumSize)
-        {
-            Print(L"%EAborting system report due to noncompliant SMBIOS%N\n");
-            return EFI_ABORTED;
-        }
-    }
-
-    SecureBoot = LibGetVariable(L"SecureBoot", &EfiGlobalVariable);
-    SetupMode = LibGetVariable(L"SetupMode", &EfiGlobalVariable);
-    SecureBootStatus = ((SecureBoot != NULL) && (*SecureBoot != 0)) ? 1 : 0;
-    // You'd expect UEFI platforms to properly clear SetupMode after they
-    // installed all the certs... but most of them don't. Hence Secure Boot
-    // disabled having precedence over SetupMode. Looking at you OVMF!
-    if ((SetupMode != NULL) && (*SetupMode != 0))
-        SecureBootStatus *= -1;
-    // Wasteful, but we can't highlight "Enabled"/"Setup" from a %s argument...
-    if (SecureBootStatus > 0)
-        Print(L"Secure Boot status: %HEnabled%N\n");
-    else if (SecureBootStatus < 0)
-        Print(L"Secure Boot status: %ESetup%N\n");
-    else
-        Print(L"Secure Boot status: Disabled\n");
-
-    return EFI_SUCCESS;
-}
-
-// Application entrypoint (must be set to 'efi_main' for gnu-efi crt0 compatibility)
+// UEFIエントリーポイント
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 {
+    EFI_STATUS Status;
+
+    EFI_DEVICE_PATH* BootmgrPath = NULL;
+    EFI_HANDLE BootmgrHandle;
     UINTN Event;
 
 #if defined(_GNU_EFI)
     InitializeLib(ImageHandle, SystemTable);
 #endif
+    do
+    {
+        gST->ConOut->ClearScreen(gST->ConOut);
 
-    // The platform logo may still be displayed → remove it
-    SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
+        Print(L"\r\n%H*** UEFI bootkit ***%N\r\n\r\n");
 
-    /*
-     * In addition to the standard %-based flags, Print() supports the following:
-     *   %N       Set output attribute to normal
-     *   %H       Set output attribute to highlight
-     *   %E       Set output attribute to error
-     *   %r       Human readable version of a status code
-     */
-    Print(L"\n%H*** UEFI Simple (%s) ***%N\n\n", ArchName);
+        // bootkit.efiの情報を表示
+        Status = PrintLoadedImageInfo(&ImageHandle);
+        if (EFI_ERROR(Status))
+        {
+            Print(L"[-] Failed to PrintImageInfo(Status: %d\r\n", Status);
+        }
 
-    PrintSystemInfo();
+        // Bootmgfw.efiのパスを取得
+        BootmgrPath = GetWindowsBootmgrDevicePath();
+        if (BootmgrPath == NULL)
+        {
+            Print(L"[-] Failed to find the Windows EFI bootmgr\r\n");
+            Status = EFI_NOT_FOUND;
+            break;
+        }
+        Print(L"[+] Found the Windows EFI bootmgr\r\n");
 
-    Print(L"\n%EPress any key to exit.%N\n");
-    SystemTable->ConIn->Reset(SystemTable->ConIn, FALSE);
-    SystemTable->BootServices->WaitForEvent(1, &SystemTable->ConIn->WaitForKey, &Event);
-#if defined(_DEBUG)
-    // If running in debug mode, use the EFI shut down call to close QEMU
-    SystemTable->RuntimeServices->ResetSystem(EfiResetShutdown, EFI_SUCCESS, 0, NULL);
-#endif
+        // Bootmgfw.efiをロードする
+        Status = gBS->LoadImage(TRUE, ImageHandle, BootmgrPath, NULL, 0, &BootmgrHandle);
+        if (EFI_ERROR(Status))
+        {
+            Print(L"[-] Failed to load the Windows EFI bootmgr(Status=%d)\r\n", Status);
+            FreePool(BootmgrPath);
+            break;
+        }
+        Print(L"[+] Loaded the Windows EFI bootmgr(Handle: %lx)\r\n", BootmgrHandle);
+
+        FreePool(BootmgrPath);
+
+        // Bootmgfw.efiの情報を表示
+        PrintLoadedImageInfo(&BootmgrHandle);
+
+        Print(L"\n%EPress any key to start.%N\n");
+        gST->ConIn->Reset(gST->ConIn, FALSE);
+        gBS->WaitForEvent(1, &gST->ConIn->WaitForKey, &Event);
+         
+        // Bootmgfw.efiを実行する
+        Status = gBS->StartImage(BootmgrHandle, NULL, NULL);
+        if (EFI_ERROR(Status))
+        {
+            Print(L"[-] Failed to start the Windows EFI bootmgr: %r\r\n", Status);
+            gBS->UnloadImage(BootmgrHandle);
+            break;
+        }
+        Print(L"[+] Started the Windows EFI bootmgr\r\n");
+
+        gBS->Exit(ImageHandle, 1, 0, NULL);
+    } while (FALSE);
 
     return EFI_SUCCESS;
 }
