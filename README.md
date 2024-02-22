@@ -1,9 +1,10 @@
-# Bootkit
-Windows—p‚ÌBootkit‚ğì¬‚·‚éB
-`ntoskrnl.exe`‚ğƒ[ƒh‚·‚é‘O‚Éƒhƒ‰ƒCƒo‚ğƒ}ƒbƒsƒ“ƒO‚·‚é‚±‚Æ‚ÅA`DSE(Driver Signature Enforcement)`‚ğ‰ñ”ğ‚·‚éB
-‚±‚ÌƒŠƒ|ƒWƒgƒŠ‚Í[btbd/umap](https://github.com/btbd/umap)‚Æ[memN0ps/bootkit-rs](https://github.com/memN0ps/bootkit-rs)‚ğQl‚ÉÄÀ‘•‚µ‚Ä‚¢‚éB
+ï»¿# Bootkit
+Windowsç”¨ã®Bootkitã‚’ä½œæˆã™ã‚‹ã€‚
+`ntoskrnl.exe`ã‚’ãƒ­ãƒ¼ãƒ‰ã™ã‚‹å‰ã«ãƒ‰ãƒ©ã‚¤ãƒã‚’ãƒãƒƒãƒ”ãƒ³ã‚°ã™ã‚‹ã“ã¨ã§ã€`DSE(Driver Signature Enforcement)`ã‚’å›é¿ã™ã‚‹ã€‚
+ã“ã®ãƒªãƒã‚¸ãƒˆãƒªã¯[btbd/umap](https://github.com/btbd/umap)ã¨[memN0ps/bootkit-rs](https://github.com/memN0ps/bootkit-rs)ã‚’å‚è€ƒã«å®Ÿè£…ã—ã¦ã„ã‚‹ã€‚
 
-## ƒNƒŒƒWƒbƒg/Ql
+## ã‚¯ãƒ¬ã‚¸ãƒƒãƒˆ/å‚è€ƒ
 - https://github.com/pbatard/uefi-simple
 - https://github.com/btbd/umap
 - https://github.com/memN0ps/bootkit-rs
+- https://github.com/Cr4sh/s6_pcie_microblaze
