@@ -2,6 +2,9 @@
 #include "Trampoline.h"
 #include "Pe.h"
 
+#include "BlImgAllocateImageBuffer.h"
+#include "OslFwpKernelSetupPhase1.h"
+
 #include <efilib.h>
 
 // ImgArchStartBootApplicationの型
@@ -30,7 +33,7 @@ CONST CHAR8 MaskImgArchStartBootApplication[] = {
 
 EFI_STATUS EFIAPI HookedImgArchStartBootApplication(VOID* AppEntry, VOID* ImageBase, UINT32 ImageSize, UINT8 BootOption, VOID* ReturnArguments)
 {
-    UINTN Event;
+    EFI_STATUS Status;
 
     Print(L"===== HookedImgArchStartBootApplication =====\r\n");
 
@@ -46,11 +49,21 @@ EFI_STATUS EFIAPI HookedImgArchStartBootApplication(VOID* AppEntry, VOID* ImageB
         Print(L"[+] Load image path winload.efi\r\n");
         Print(L"[+]     -> ImageBase = 0x%llx\r\n", ImageBase);
         Print(L"[+]     -> ImageSize = 0x%llx\r\n", ImageSize);
-    } while (FALSE);
 
-    Print(L"\n%EPress any key to start.%N\n");
-    gST->ConIn->Reset(gST->ConIn, FALSE);
-    gBS->WaitForEvent(1, &gST->ConIn->WaitForKey, &Event);
+        // winload.efi!BlImgAllocateImageBufferをフック
+        Status = SetupBlImgAllocateImageBuffer(ImageBase);
+        if (!EFI_ERROR(Status))
+        {
+            Print(L"[+] Hooked the winload.efi!BlImgAllocateImageBuffer\r\n");
+        }
+
+        // winload.efi!OslFwpKernelSetupPhase1をフック
+        Status = SetupOslFwpKernelSetupPhase1(ImageBase);
+        if (!EFI_ERROR(Status))
+        {
+            Print(L"[+] Hooked the winload.efi!OslFwpKernelSetupPhase1\r\n");
+        }
+    } while (FALSE);
 
     return ImgArchStartBootApplication(AppEntry, ImageBase, ImageSize, BootOption, ReturnArguments);
 }
@@ -81,7 +94,8 @@ EFI_STATUS EFIAPI SetupImgArchStartBootApplication(EFI_HANDLE BootmgrHandle)
         }
         Print(L"[+] ImgArchStartBootApplication is 0x%llx\r\n", BaseImgArchStartBootApplication);
 
-        // bootmgfw.efi!ImgArchStartBootApplicationをフックする
+        // bootmgfw.efi!ImgArchStartBootApplicationをフック
+        // winload.efiのベースアドレスを取得する
         ImgArchStartBootApplication = TrampolineHook(HookedImgArchStartBootApplication, BaseImgArchStartBootApplication, OriginalImgArchStartBootApplication);
         if (ImgArchStartBootApplication == NULL)
         {

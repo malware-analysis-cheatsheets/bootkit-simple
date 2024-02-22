@@ -5,6 +5,60 @@
 #include <efi.h>
 #include <efilib.h>
 
+EFI_EXIT_BOOT_SERVICES OriginalExitBootServices = NULL;
+
+BOOLEAN ExecutedExitBootServices = FALSE;
+
+VOID* SetServicePointer(IN OUT VOID** ServiceTableFunction, IN VOID* NewFunction)
+{
+    VOID* OriginalFunction = NULL;
+    EFI_TPL OldTpl = TPL_HIGH_LEVEL;
+
+    if (ServiceTableFunction == NULL || NewFunction == NULL)
+    {
+        return OriginalFunction;
+    }
+
+    if (gBS == NULL)
+    {
+        return OriginalFunction;
+    }
+
+    if (!ExecutedExitBootServices)
+    {
+        OldTpl = gBS->RaiseTPL(OldTpl);
+    }
+
+    OriginalFunction = *ServiceTableFunction;
+    *ServiceTableFunction = NewFunction;
+
+    if (!ExecutedExitBootServices)
+    {
+        gBS->RestoreTPL(OldTpl);
+    }
+
+    return OriginalFunction;
+}
+
+// winload.efiから呼び出され、ブートサービスを終了させる
+EFI_STATUS HookedExitBootServices(EFI_HANDLE ImageHandle, UINTN MapKey)
+{
+    UINTN Event;
+
+    Print(L"===== HookedExitBootServices =====\r\n");
+
+    SetServicePointer((VOID**)&gBS->ExitBootServices, OriginalExitBootServices);
+
+    // ExitBootServicesが実行された後はブートサービスを利用することができない
+    ExecutedExitBootServices = TRUE;
+
+    Print(L"\n%EPress any key to start.%N\n");
+    gST->ConIn->Reset(gST->ConIn, FALSE);
+    gBS->WaitForEvent(1, &gST->ConIn->WaitForKey, &Event);
+
+    return gBS->ExitBootServices(ImageHandle, MapKey);
+}
+
 // UEFIエントリーポイント
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 {
@@ -29,7 +83,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
             Print(L"[-] Failed to PrintImageInfo(Status: %d)\r\n", Status);
         }
 
-        // Bootmgfw.efiのパスを取得
+        // bootmgfw.efiのパスを取得
         BootmgrPath = GetWindowsBootmgrDevicePath();
         if (BootmgrPath == NULL)
         {
@@ -39,7 +93,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         }
         Print(L"[+] Found the Windows EFI bootmgr\r\n");
 
-        // Bootmgfw.efiをロードする
+        // bootmgfw.efiをロードする
         Status = gBS->LoadImage(TRUE, ImageHandle, BootmgrPath, NULL, 0, &BootmgrHandle);
         if (EFI_ERROR(Status))
         {
@@ -51,18 +105,21 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 
         FreePool(BootmgrPath);
 
-        // Bootmgfw.efiの情報を表示
+        // bootmgfw.efiの情報を表示
         PrintLoadedImageInfo(&BootmgrHandle);
 
-        //Bootmgfw.efi!ImgArchStartBootApplicationをフック
+        //bootmgfw.efi!ImgArchStartBootApplicationをフック
         Status = SetupImgArchStartBootApplication(BootmgrHandle);
         if (EFI_ERROR(Status))
         {
             Print(L"[-] Failed to hook to Windows EFI bootmgr(Status=%d)\r\n", Status);
         }
-        Print(L"[+] Hooked the Bootmgfw.efi!ImgArchStartBootApplication\r\n");
-         
-        // Bootmgfw.efiを実行する
+        Print(L"[+] Hooked the bootmgfw.efi!ImgArchStartBootApplication\r\n");
+
+        OriginalExitBootServices = SetServicePointer((VOID*)&gBS->ExitBootServices, &HookedExitBootServices);
+        Print(L"[+] Original ExitBootServices is 0x%llx\n", OriginalExitBootServices);
+
+        // bootmgfw.efiを実行する
         Status = gBS->StartImage(BootmgrHandle, NULL, NULL);
         if (EFI_ERROR(Status))
         {

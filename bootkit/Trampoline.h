@@ -36,3 +36,13 @@ VOID TrampolineUnhook(VOID* dst, VOID* orig);
  * @retval !=NULL 見つけた先頭アドレス
  */
 VOID* FindPattern(CHAR8* base, UINTN size, CONST CHAR8* pattern, CONST CHAR8* mask);
+
+/**
+ * @brief 探索範囲を減らすため、セクションからパターンを見つける
+ * @param base[in] イメージのベースアドレス
+ * @param pattern[in] 探索するパターン
+ * @param mask[in] 探索パターンのマスク
+ * @retval NULL 見つからなかった
+ * @retval !=NULL 見つけた先頭アドレス
+ */
+VOID* FindPatternFromSections(CHAR8* base, CONST CHAR8* pattern, CONST CHAR8* mask);

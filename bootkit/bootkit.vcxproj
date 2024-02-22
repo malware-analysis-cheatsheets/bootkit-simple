@@ -106,15 +106,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BlImgAllocateImageBuffer.c" />
     <ClCompile Include="Bootmgfw.c" />
     <ClCompile Include="ImgArchStartBootApplication.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="OslFwpKernelSetupPhase1.c" />
+    <ClCompile Include="Pe.c" />
     <ClCompile Include="Print.c" />
     <ClCompile Include="Trampoline.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BlImgAllocateImageBuffer.h" />
     <ClInclude Include="Bootmgfw.h" />
     <ClInclude Include="ImgArchStartBootApplication.h" />
+    <ClInclude Include="OslFwpKernelSetupPhase1.h" />
     <ClInclude Include="Pe.h" />
     <ClInclude Include="Print.h" />
     <ClInclude Include="Trampoline.h" />

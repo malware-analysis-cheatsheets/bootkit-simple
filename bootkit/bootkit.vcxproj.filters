@@ -29,6 +29,15 @@
     <ClCompile Include="Trampoline.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BlImgAllocateImageBuffer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Pe.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OslFwpKernelSetupPhase1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Print.h">
@@ -44,6 +53,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Pe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BlImgAllocateImageBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OslFwpKernelSetupPhase1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
