@@ -107,12 +107,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bootmgfw.c" />
+    <ClCompile Include="ImgArchStartBootApplication.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="Print.c" />
+    <ClCompile Include="Trampoline.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bootmgfw.h" />
+    <ClInclude Include="ImgArchStartBootApplication.h" />
+    <ClInclude Include="Pe.h" />
     <ClInclude Include="Print.h" />
+    <ClInclude Include="Trampoline.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

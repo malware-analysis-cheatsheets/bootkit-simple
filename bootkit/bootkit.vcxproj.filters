@@ -23,12 +23,27 @@
     <ClCompile Include="Bootmgfw.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ImgArchStartBootApplication.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Trampoline.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Print.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Bootmgfw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImgArchStartBootApplication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Trampoline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

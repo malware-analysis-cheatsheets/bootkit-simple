@@ -1,5 +1,6 @@
 ﻿#include "Print.h"
 #include "Bootmgfw.h"
+#include "ImgArchStartBootApplication.h"
 
 #include <efi.h>
 #include <efilib.h>
@@ -11,7 +12,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 
     EFI_DEVICE_PATH* BootmgrPath = NULL;
     EFI_HANDLE BootmgrHandle;
-    UINTN Event;
 
 #if defined(_GNU_EFI)
     InitializeLib(ImageHandle, SystemTable);
@@ -26,7 +26,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         Status = PrintLoadedImageInfo(&ImageHandle);
         if (EFI_ERROR(Status))
         {
-            Print(L"[-] Failed to PrintImageInfo(Status: %d\r\n", Status);
+            Print(L"[-] Failed to PrintImageInfo(Status: %d)\r\n", Status);
         }
 
         // Bootmgfw.efiのパスを取得
@@ -54,9 +54,13 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         // Bootmgfw.efiの情報を表示
         PrintLoadedImageInfo(&BootmgrHandle);
 
-        Print(L"\n%EPress any key to start.%N\n");
-        gST->ConIn->Reset(gST->ConIn, FALSE);
-        gBS->WaitForEvent(1, &gST->ConIn->WaitForKey, &Event);
+        //Bootmgfw.efi!ImgArchStartBootApplicationをフック
+        Status = SetupImgArchStartBootApplication(BootmgrHandle);
+        if (EFI_ERROR(Status))
+        {
+            Print(L"[-] Failed to hook to Windows EFI bootmgr(Status=%d)\r\n", Status);
+        }
+        Print(L"[+] Hooked the Bootmgfw.efi!ImgArchStartBootApplication\r\n");
          
         // Bootmgfw.efiを実行する
         Status = gBS->StartImage(BootmgrHandle, NULL, NULL);
