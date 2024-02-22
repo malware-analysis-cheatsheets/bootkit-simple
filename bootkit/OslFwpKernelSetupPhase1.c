@@ -1,5 +1,6 @@
 ﻿#include "OslFwpKernelSetupPhase1.h"
 #include "Trampoline.h"
+#include "Serial.h"
 
 #include <efilib.h>
 
@@ -35,16 +36,15 @@ CONST CHAR8 MaskOslFwpKernelSetupPhase1[] = {
 
 EFI_STATUS EFIAPI HookedOslFwpKernelSetupPhase1(LOADER_PARAMETER_BLOCK* LoaderParameterBlock)
 {
-    EFI_STATUS Status;
+    SerialPrint(L"===== HookedOslFwpKernelSetupPhase1 =====\r\n");
+
     do
     {
         // winload.efi!OslFwpKernelSetupPhase1をアンフックする
-        TrampolineUnhook(OslFwpKernelSetupPhase1, OriginalOslFwpKernelSetupPhase1);
+        TrampolineUnhook(OslFwpKernelSetupPhase1, OriginalOslFwpKernelSetupPhase1, FALSE);
     } while (FALSE);
 
-    Status = OslFwpKernelSetupPhase1(LoaderParameterBlock);
-
-    return Status;
+    return OslFwpKernelSetupPhase1(LoaderParameterBlock);
 }
 
 EFI_STATUS EFIAPI SetupOslFwpKernelSetupPhase1(VOID* WinloadBase)
@@ -57,7 +57,7 @@ EFI_STATUS EFIAPI SetupOslFwpKernelSetupPhase1(VOID* WinloadBase)
     {
         Print(L"[+] Find OslFwpKernelSetupPhase1 in winload.efi\r\n");
 
-        // winload.efi!OslFwpKernelSetupPhase1をフック
+        // winload.efi!OslFwpKernelSetupPhase1の先頭アドレスを探す
         BaseOslFwpKernelSetupPhase1 = FindPatternFromSections(WinloadBase, SigOslFwpKernelSetupPhase1, MaskOslFwpKernelSetupPhase1);
         if (BaseOslFwpKernelSetupPhase1 == NULL)
         {
@@ -66,9 +66,9 @@ EFI_STATUS EFIAPI SetupOslFwpKernelSetupPhase1(VOID* WinloadBase)
         }
         Print(L"[+] OslFwpKernelSetupPhase1 is 0x%llx\r\n", BaseOslFwpKernelSetupPhase1);
 
-        // winload.efi!OslFwpKernelSetupPhase1をフックする
+        // winload.efi!OslFwpKernelSetupPhase1をフック
         // ntoskrnl.exeのアドレスを取得、ターゲットドライバのエントリーポイントをフックする
-        OslFwpKernelSetupPhase1 = TrampolineHook(HookedOslFwpKernelSetupPhase1, BaseOslFwpKernelSetupPhase1, OriginalOslFwpKernelSetupPhase1);
+        OslFwpKernelSetupPhase1 = TrampolineHook(HookedOslFwpKernelSetupPhase1, BaseOslFwpKernelSetupPhase1, OriginalOslFwpKernelSetupPhase1, TRUE);
         if (OslFwpKernelSetupPhase1 == NULL)
         {
             Print(L"[-] Failed to hook OslFwpKernelSetupPhase1\r\n");

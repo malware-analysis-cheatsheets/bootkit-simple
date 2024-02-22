@@ -113,6 +113,7 @@
     <ClCompile Include="OslFwpKernelSetupPhase1.c" />
     <ClCompile Include="Pe.c" />
     <ClCompile Include="Print.c" />
+    <ClCompile Include="Serial.c" />
     <ClCompile Include="Trampoline.c" />
   </ItemGroup>
   <ItemGroup>
@@ -122,6 +123,7 @@
     <ClInclude Include="OslFwpKernelSetupPhase1.h" />
     <ClInclude Include="Pe.h" />
     <ClInclude Include="Print.h" />
+    <ClInclude Include="Serial.h" />
     <ClInclude Include="Trampoline.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

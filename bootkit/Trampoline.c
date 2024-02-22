@@ -8,8 +8,6 @@
 
 #define HookTemplateOffset 6
 
-extern BOOLEAN ExecutedExitBootServices;
-
 BOOLEAN CheckMask(CHAR8* base, CONST CHAR8* pattern, CONST CHAR8* mask)
 {
     for (; *mask; ++base, ++pattern, ++mask)
@@ -81,7 +79,7 @@ VOID* FindPatternFromSections(CHAR8* base, CONST CHAR8* pattern, CONST CHAR8* ma
     return addr;
 }
 
-VOID* TrampolineHook(VOID* dst, VOID* src, UINT8* orig)
+VOID* TrampolineHook(VOID* dst, VOID* src, UINT8* orig, BOOLEAN IsTpl)
 {
     EFI_TPL Tpl = TPL_HIGH_LEVEL;
     if (dst == NULL || src == NULL)
@@ -89,7 +87,7 @@ VOID* TrampolineHook(VOID* dst, VOID* src, UINT8* orig)
         return NULL;
     }
 
-    if (!ExecutedExitBootServices)
+    if (IsTpl)
     {
         Tpl = gBS->RaiseTPL(Tpl);
     }
@@ -102,7 +100,7 @@ VOID* TrampolineHook(VOID* dst, VOID* src, UINT8* orig)
     CopyMem(src, HookTemplate, TRAMPOLINE_SIZE);
     *(UINT64*)((UINT8*)src + HookTemplateOffset) = (UINT64)dst;
 
-    if (!ExecutedExitBootServices)
+    if (IsTpl)
     {
         gBS->RestoreTPL(Tpl);
     }
@@ -110,7 +108,7 @@ VOID* TrampolineHook(VOID* dst, VOID* src, UINT8* orig)
     return src;
 }
 
-VOID TrampolineUnhook(VOID* dst, VOID* orig)
+VOID TrampolineUnhook(VOID* dst, VOID* orig, BOOLEAN IsTpl)
 {
     EFI_TPL Tpl = TPL_HIGH_LEVEL;
     if (dst == NULL || orig == NULL)
@@ -118,14 +116,14 @@ VOID TrampolineUnhook(VOID* dst, VOID* orig)
         return;
     }
 
-    if (!ExecutedExitBootServices)
+    if (IsTpl)
     {
         Tpl = gBS->RaiseTPL(Tpl);
     }
 
     CopyMem(dst, orig, TRAMPOLINE_SIZE);
 
-    if (!ExecutedExitBootServices)
+    if (IsTpl)
     {
         gBS->RestoreTPL(Tpl);
     }

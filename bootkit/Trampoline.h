@@ -14,17 +14,19 @@ static CONST UINT8 HookTemplate[] = {
  * @param dst[in] フック先の関数を指定
  * @param src[in] フックされる関数の先頭アドレス
  * @param orig[in] アンフック時に戻す用
+ * @param tpl[in] bootmgfwではTRUE、winloadではFALSEを指定する
  * @retval NULL 失敗
  * @retval !=NULL フックされる関数の先頭アドレス
  */
-VOID* TrampolineHook(VOID* dst, VOID* src, UINT8* orig);
+VOID* TrampolineHook(VOID* dst, VOID* src, UINT8* orig, BOOLEAN tpl);
 
 /**
  * @brief フックされた関数をアンフックする
  * @param dst[in] フックされた関数の先頭アドレス
  * @param orig[in] バックアップを保持している変数
+ * @param tpl[in] bootmgfwではTRUE、winloadではFALSEを指定する
  */
-VOID TrampolineUnhook(VOID* dst, VOID* orig);
+VOID TrampolineUnhook(VOID* dst, VOID* orig, BOOLEAN tpl);
 
 /**
  * @brief パターンを見つける
