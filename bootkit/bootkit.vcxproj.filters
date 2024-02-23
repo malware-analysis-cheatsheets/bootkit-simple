@@ -41,6 +41,9 @@
     <ClCompile Include="Serial.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mapper.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Print.h">
@@ -65,6 +68,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

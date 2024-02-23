@@ -1,6 +1,7 @@
 ﻿#include "OslFwpKernelSetupPhase1.h"
 #include "Trampoline.h"
 #include "Serial.h"
+#include "Mapper.h"
 
 #include <efilib.h>
 
@@ -34,6 +35,8 @@ CONST CHAR8 MaskOslFwpKernelSetupPhase1[] = {
     "xxxxxxxxxxxxxxxx"
 };
 
+extern MAP_INFO Mapper;
+
 EFI_STATUS EFIAPI HookedOslFwpKernelSetupPhase1(LOADER_PARAMETER_BLOCK* LoaderParameterBlock)
 {
     SerialPrint(L"===== HookedOslFwpKernelSetupPhase1 =====\r\n");
@@ -42,6 +45,12 @@ EFI_STATUS EFIAPI HookedOslFwpKernelSetupPhase1(LOADER_PARAMETER_BLOCK* LoaderPa
     {
         // winload.efi!OslFwpKernelSetupPhase1をアンフックする
         TrampolineUnhook(OslFwpKernelSetupPhase1, OriginalOslFwpKernelSetupPhase1, FALSE);
+
+        if (!Mapper.AllocatedBuffer)
+        {
+            SerialPrint(L"[-] Failed to allocate mapper\r\n");
+            break;
+        }
     } while (FALSE);
 
     return OslFwpKernelSetupPhase1(LoaderParameterBlock);
