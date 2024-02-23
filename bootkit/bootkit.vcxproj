@@ -118,6 +118,7 @@
     <ClCompile Include="Trampoline.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BinDriver.h" />
     <ClInclude Include="BlImgAllocateImageBuffer.h" />
     <ClInclude Include="Bootmgfw.h" />
     <ClInclude Include="ImgArchStartBootApplication.h" />
