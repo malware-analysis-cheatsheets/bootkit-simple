@@ -37,8 +37,36 @@ CONST CHAR8 MaskOslFwpKernelSetupPhase1[] = {
 
 extern MAP_INFO Mapper;
 
+#define CONTAINING_RECORD(address, type, field) ((type *)((UINT8 *)(address) - (UINTN)(&((type *)0)->field)))
+
+PKLDR_DATA_TABLE_ENTRY GetLoadedModule(LIST_ENTRY* LoadOrderListHead, CHAR16* ModuleName)
+{
+    PKLDR_DATA_TABLE_ENTRY module = NULL;
+
+    do
+    {
+        if (LoadOrderListHead == NULL || ModuleName == NULL)
+        {
+            break;
+        }
+        for (LIST_ENTRY* entry = LoadOrderListHead->Flink; entry != LoadOrderListHead; entry = entry->Flink)
+        {
+            module = CONTAINING_RECORD(entry, KLDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
+            if (module && StrnCmp(ModuleName, module->BaseImageName.Buffer, module->BaseImageName.Length) == 0)
+            {
+                break;
+            }
+        }
+    } while (FALSE);
+
+    return module;
+}
+
 EFI_STATUS EFIAPI HookedOslFwpKernelSetupPhase1(LOADER_PARAMETER_BLOCK* LoaderParameterBlock)
 {
+    PKLDR_DATA_TABLE_ENTRY Ntoskrnl = NULL;
+    PKLDR_DATA_TABLE_ENTRY TargetModule = NULL;
+
     SerialPrint(L"===== HookedOslFwpKernelSetupPhase1 =====\r\n");
 
     do
@@ -51,6 +79,30 @@ EFI_STATUS EFIAPI HookedOslFwpKernelSetupPhase1(LOADER_PARAMETER_BLOCK* LoaderPa
             SerialPrint(L"[-] Failed to allocate mapper\r\n");
             break;
         }
+
+        // ntoskrnl.exe
+        Ntoskrnl = GetLoadedModule(LoaderParameterBlock, L"ntoskrnl.exe");
+        if (Ntoskrnl == NULL)
+        {
+            SerialPrint(L"[-] Failed to find the ntoskrnl.exe\r\n");
+            break;
+        }
+        SerialPrint(L"[+] Found %s\r\n", Ntoskrnl->BaseImageName.Buffer);
+        SerialPrint(L"[+]      -> ImageBase = 0x%llx\r\n", Ntoskrnl->ImageBase);
+        SerialPrint(L"[+]      -> ImageSize = 0x%llx\r\n", Ntoskrnl->SizeOfImage);
+        SerialPrint(L"[+]      -> EntryPoint = 0x%llx\r\n", Ntoskrnl->EntryPoint);
+
+        // disk.sys
+        TargetModule = GetLoadedModule(LoaderParameterBlock, L"disk.sys");
+        if (TargetModule == NULL)
+        {
+            SerialPrint(L"[-] Failed to find the disk.sys\r\n");
+            break;
+        }
+        SerialPrint(L"[+] Found %s\r\n", TargetModule->BaseImageName.Buffer);
+        SerialPrint(L"[+]      -> ImageBase = 0x%llx\r\n", TargetModule->ImageBase);
+        SerialPrint(L"[+]      -> ImageSize = 0x%llx\r\n", TargetModule->SizeOfImage);
+        SerialPrint(L"[+]      -> EntryPoint = 0x%llx\r\n", TargetModule->EntryPoint);
     } while (FALSE);
 
     return OslFwpKernelSetupPhase1(LoaderParameterBlock);
