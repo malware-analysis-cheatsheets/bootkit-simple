@@ -2,6 +2,7 @@
 #include "Trampoline.h"
 #include "Serial.h"
 #include "BinDriver.h"
+#include "Pe.h"
 
 #include <efilib.h>
 
@@ -54,17 +55,25 @@ EFI_STATUS MapDriver(VOID* BaseNtoskrnl, VOID** EntryPoint, VOID* EntryPointTarg
         SerialPrint(L"[+] Driver Virtual Memory  = 0x%llx\r\n", BufferDriver);
 
         // DOS/NT/Sectionヘッダをコピー
-        SerialPrint(L"[+] Copy to pe header\r\n");
+        SerialPrint(L"[+] Copy the pe header\r\n");
+        Status = PeHeader(BaseDriver, BufferDriver);
+        if (EFI_ERROR(Status))
+        {
+            SerialPrint(L"[-] Failed to copy the pe header\r\n");
+            break;
+        }
 
         // セクションの展開
-        SerialPrint(L"[+] Write to pe sections\r\n");
+        SerialPrint(L"[+] Write the pe sections\r\n");
 
         // イメージベースの再配置
-        SerialPrint(L"[+] Relocate to image base\r\n");
+        SerialPrint(L"[+] Relocate the image base\r\n");
 
         // IAT解決
-        SerialPrint(L"[+] Resolve to IAT\r\n");
+        SerialPrint(L"[+] Resolve the IAT\r\n");
     } while (FALSE);
+
+    return Status;
 }
 
 EFI_STATUS SetupDriver(PKLDR_DATA_TABLE_ENTRY Ntoskrnl, PKLDR_DATA_TABLE_ENTRY TargetModule)

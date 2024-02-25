@@ -146,3 +146,12 @@ INT32 GetImageSize(VOID* Base);
  * @retval セクションの数
  */
 INT32 GetSectionHeader(VOID* Base, PIMAGE_SECTION_HEADER* SectionHeader);
+
+
+// =====================================================================================
+/**
+ * @breif PEのヘッダーを書き込む
+ * @param Dst[in] 書き込み先のベースアドレス
+ * @param Src[in] PEのベースアドレス
+ */
+EFI_STATUS PeHeader(VOID* Dst, VOID* Src);

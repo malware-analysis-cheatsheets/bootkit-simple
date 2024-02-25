@@ -51,3 +51,35 @@ INT32 GetSectionHeader(VOID* Base, PIMAGE_SECTION_HEADER* SectionHeader)
 
     return NumberOfSection;
 }
+
+EFI_STATUS PeHeader(VOID* Dst, VOID* Src)
+{
+    EFI_STATUS Status;
+
+    INT32 Size = 0;
+
+    do
+    {
+        if (Dst == NULL || Src == NULL)
+        {
+            Status = EFI_INVALID_PARAMETER;
+            break;
+        }
+
+        if (DosHeader(Src)->e_magic != IMAGE_DOS_SIGNATURE ||
+            NtHeaders(Src)->Signature != IMAGE_PE_SIGNATURE)
+        {
+            Status = EFI_UNSUPPORTED;
+            break;
+        }
+
+        Size = OptionalHeader(Src).SizeOfHeaders;
+        SerialPrint(L"[+] Size of Pe headers: 0x%llx\r\n", Size);
+        
+        CopyMem(Dst, Src, Size);
+
+        Status = EFI_SUCCESS;
+    } while (FALSE);
+
+    return Status;
+}
