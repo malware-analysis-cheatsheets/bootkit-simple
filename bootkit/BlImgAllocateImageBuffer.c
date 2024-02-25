@@ -2,6 +2,8 @@
 #include "Trampoline.h"
 #include "Serial.h"
 #include "Mapper.h"
+#include "Pe.h"
+#include "BinDriver.h"
 
 #include <efilib.h>
 
@@ -31,8 +33,6 @@ CONST CHAR8 MaskBlImgAllocateImageBuffer[] = {
 
 MAP_INFO Mapper = { 0 };
 
-#define IMAGE_SIZE 0x1000
-
 EFI_STATUS EFIAPI HookedBlImgAllocateImageBuffer(VOID** ImageBuffer, UINTN ImageSize, UINT32 MemoryType, UINT32 Attributes, VOID* Unused, UINT32 Flags)
 {
     EFI_STATUS Status;
@@ -49,7 +49,7 @@ EFI_STATUS EFIAPI HookedBlImgAllocateImageBuffer(VOID** ImageBuffer, UINTN Image
         {
             // ドライバーをマップする領域を確保
             // 1度確保に失敗したら、それ以降行わない
-            Mapper.AllocatedBufferStatus = BlImgAllocateImageBuffer(&Mapper.AllocatedBuffer, IMAGE_SIZE, MemoryType, BL_MEMORY_ATTRIBUTE_RWX, Unused, 0);
+            Mapper.AllocatedBufferStatus = BlImgAllocateImageBuffer(&Mapper.AllocatedBuffer, GetImageSize(DriverBinary), MemoryType, BL_MEMORY_ATTRIBUTE_RWX, Unused, 0);
             if (EFI_ERROR(Mapper.AllocatedBufferStatus))
             {
                 SerialPrint(L"[-] Failed to allocate(Status=%d)\r\n", Mapper.AllocatedBufferStatus);

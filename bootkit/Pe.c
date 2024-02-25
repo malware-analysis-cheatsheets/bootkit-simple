@@ -10,6 +10,15 @@
 #define DataDirectory(p) (OptionalHeader(p)).DataDirectory
 #define Signature(p) NtHeaders(p)->Signature
 
+INT32 GetImageSize(VOID* Base)
+{
+    if (Base == NULL)
+    {
+        return NULL;
+    }
+
+    return OptionalHeader(Base).SizeOfImage;
+}
 
 INT32 GetSectionHeader(VOID* Base, PIMAGE_SECTION_HEADER* SectionHeader)
 {

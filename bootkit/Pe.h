@@ -132,5 +132,17 @@ typedef struct _IMAGE_SECTION_HEADER
     ULONG Characteristics;                                                  //0x24
 }IMAGE_SECTION_HEADER, * PIMAGE_SECTION_HEADER;
 
+/**
+ * @brief イメージがメモリに読み込まれるときのイメージのサイズ
+ * @param Base[in] peのベースアドレス
+ * @retval イメージのサイズ
+ */
+INT32 GetImageSize(VOID* Base);
 
+/**
+ * @brief セクションヘッダの情報
+ * @param Base[in] peのベースアドレス
+ * @param SectionHeader[out] セクションヘッダの最初のアドレス
+ * @retval セクションの数
+ */
 INT32 GetSectionHeader(VOID* Base, PIMAGE_SECTION_HEADER* SectionHeader);
