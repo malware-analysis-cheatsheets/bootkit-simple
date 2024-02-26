@@ -65,6 +65,12 @@ EFI_STATUS MapDriver(VOID* BaseNtoskrnl, VOID** EntryPoint, VOID* EntryPointTarg
 
         // セクションの展開
         SerialPrint(L"[+] Write the pe sections\r\n");
+        Status = PeSections(BaseDriver, BufferDriver);
+        if (EFI_ERROR(Status))
+        {
+            SerialPrint(L"[-] Failed to write the pe sections\r\n");
+            break;
+        }
 
         // イメージベースの再配置
         SerialPrint(L"[+] Relocate the image base\r\n");

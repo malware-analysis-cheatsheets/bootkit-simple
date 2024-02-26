@@ -155,3 +155,10 @@ INT32 GetSectionHeader(VOID* Base, PIMAGE_SECTION_HEADER* SectionHeader);
  * @param Src[in] PEのベースアドレス
  */
 EFI_STATUS PeHeader(VOID* Dst, VOID* Src);
+
+/**
+ * @breif 各セクションをメモリ展開する
+ * @param Dst[in] 書き込み先のベースアドレス
+ * @param Src[in] PEのベースアドレス
+ */
+EFI_STATUS PeSections(VOID* Dst, VOID* Src);

@@ -52,6 +52,7 @@ INT32 GetSectionHeader(VOID* Base, PIMAGE_SECTION_HEADER* SectionHeader)
     return NumberOfSection;
 }
 
+// =====================================================================================
 EFI_STATUS PeHeader(VOID* Dst, VOID* Src)
 {
     EFI_STATUS Status;
@@ -77,6 +78,58 @@ EFI_STATUS PeHeader(VOID* Dst, VOID* Src)
         SerialPrint(L"[+] Size of Pe headers: 0x%llx\r\n", Size);
         
         CopyMem(Dst, Src, Size);
+
+        Status = EFI_SUCCESS;
+    } while (FALSE);
+
+    return Status;
+}
+
+EFI_STATUS PeSections(VOID* Dst, VOID* Src)
+{
+    EFI_STATUS Status;
+    PIMAGE_SECTION_HEADER SectionHeader = NULL;
+    VOID* RawData = NULL;
+    VOID* VA = NULL;
+    INT32 Size = 0;
+    INT32 NumberOfSections = 0;
+
+    do
+    {
+        if (Dst == NULL || Src == NULL)
+        {
+            Status = EFI_INVALID_PARAMETER;
+            break;
+        }
+
+        NumberOfSections = GetSectionHeader(Src, &SectionHeader);
+        if (NumberOfSections == 0 || SectionHeader == NULL)
+        {
+            Status = EFI_NOT_FOUND;
+            break;
+        }
+        SerialPrint(L"[+]      -> NumberOfSections = %d\r\n", NumberOfSections);
+
+        for (INT32 i = 0; i < NumberOfSections; i++)
+        {
+            SerialPrint(L"[+]      -> Section = %c%c%c%c%c%c%c%c\r\n",
+                SectionHeader[i].Name[0],
+                SectionHeader[i].Name[1],
+                SectionHeader[i].Name[2],
+                SectionHeader[i].Name[3],
+                SectionHeader[i].Name[4],
+                SectionHeader[i].Name[5],
+                SectionHeader[i].Name[6],
+                SectionHeader[i].Name[7]);
+            RawData = (VOID*)RVA_TO_VA(Src, SectionHeader[i].PointerToRawData);
+            SerialPrint(L"[+]           -> RawData = %llx\r\n", RawData);
+            VA = (VOID*)RVA_TO_VA(Dst, SectionHeader[i].VirtualAddress);
+            SerialPrint(L"[+]           -> VA = 0x%llx\r\n", VA);
+            Size = MAX(SectionHeader[i].SizeOfRawData, SectionHeader[i].Misc.VirtualSize);
+            SerialPrint(L"[+]           -> size = 0x%x\r\n", Size);
+
+            CopyMem(VA, RawData, Size);
+        }
 
         Status = EFI_SUCCESS;
     } while (FALSE);
