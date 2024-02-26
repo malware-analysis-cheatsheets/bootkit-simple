@@ -10,6 +10,8 @@
 #define DataDirectory(p) (OptionalHeader(p)).DataDirectory
 #define Signature(p) NtHeaders(p)->Signature
 
+#define MAX(a, b) (((a) < (b)) ? (b) : (a))
+
 INT32 GetImageSize(VOID* Base)
 {
     if (Base == NULL)
