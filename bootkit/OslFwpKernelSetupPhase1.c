@@ -81,7 +81,7 @@ EFI_STATUS EFIAPI HookedOslFwpKernelSetupPhase1(LOADER_PARAMETER_BLOCK* LoaderPa
         }
 
         // ntoskrnl.exe
-        Ntoskrnl = GetLoadedModule(LoaderParameterBlock, L"ntoskrnl.exe");
+        Ntoskrnl = GetLoadedModule(&LoaderParameterBlock->LoadOrderListHead, L"ntoskrnl.exe");
         if (Ntoskrnl == NULL)
         {
             SerialPrint(L"[-] Failed to find the ntoskrnl.exe\r\n");
@@ -93,7 +93,7 @@ EFI_STATUS EFIAPI HookedOslFwpKernelSetupPhase1(LOADER_PARAMETER_BLOCK* LoaderPa
         SerialPrint(L"[+]      -> EntryPoint = 0x%llx\r\n", Ntoskrnl->EntryPoint);
 
         // disk.sys
-        TargetModule = GetLoadedModule(LoaderParameterBlock, L"disk.sys");
+        TargetModule = GetLoadedModule(&LoaderParameterBlock->LoadOrderListHead, L"disk.sys");
         if (TargetModule == NULL)
         {
             SerialPrint(L"[-] Failed to find the disk.sys\r\n");
