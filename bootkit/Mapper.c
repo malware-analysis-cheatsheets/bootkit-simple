@@ -74,6 +74,12 @@ EFI_STATUS MapDriver(VOID* BaseNtoskrnl, VOID** EntryPoint, VOID* EntryPointTarg
 
         // イメージベースの再配置
         SerialPrint(L"[+] Relocate the image base\r\n");
+        Status = PeRelocation(BaseDriver, BufferDriver);
+        if (EFI_ERROR(Status))
+        {
+            SerialPrint(L"[-] Failed to relocate the image base\r\n");
+            break;
+        }
 
         // IAT解決
         SerialPrint(L"[+] Resolve the IAT\r\n");

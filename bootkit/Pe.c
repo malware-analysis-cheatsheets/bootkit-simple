@@ -1,4 +1,7 @@
 ﻿#include "Pe.h"
+#include "Serial.h"
+
+#include <efilib.h>
 
 
 #define DosHeader(p) ((PIMAGE_DOS_HEADER)p)
@@ -16,7 +19,7 @@ INT32 GetImageSize(VOID* Base)
 {
     if (Base == NULL)
     {
-        return NULL;
+        return 0;
     }
 
     return OptionalHeader(Base).SizeOfImage;
@@ -78,7 +81,7 @@ EFI_STATUS PeHeader(VOID* Dst, VOID* Src)
 
         Size = OptionalHeader(Src).SizeOfHeaders;
         SerialPrint(L"[+] Size of Pe headers: 0x%llx\r\n", Size);
-        
+
         CopyMem(Dst, Src, Size);
 
         Status = EFI_SUCCESS;
@@ -131,6 +134,67 @@ EFI_STATUS PeSections(VOID* Dst, VOID* Src)
             SerialPrint(L"[+]           -> size = 0x%x\r\n", Size);
 
             CopyMem(VA, RawData, Size);
+        }
+
+        Status = EFI_SUCCESS;
+    } while (FALSE);
+
+    return Status;
+}
+
+EFI_STATUS PeRelocation(VOID* Dst, VOID* Src)
+{
+    EFI_STATUS Status;
+
+    UINT64 Delta = 0;
+    PIMAGE_DATA_DIRECTORY Reloc = NULL;
+    VOID* BaseReloc = NULL;
+    PIMAGE_DATA_DIRECTORY Relocation = NULL;
+    PBASE_RELOCATION_BLOCK RelocBlock = NULL;
+    UINT32 RelocCount = 0;
+    PBASE_RELOCATION_ENTRY RelocEntry = NULL;
+    DWORD* RelocRva = NULL;
+    UINT64* Patch = NULL;
+    UINT32 RelocSizeCounter = 0;
+
+    do
+    {
+        if (Dst == NULL || Src == NULL)
+        {
+            Status = EFI_INVALID_PARAMETER;
+            break;
+        }
+
+        Delta = (UINT64)Dst - OptionalHeader(Src).ImageBase;
+        SerialPrint(L"[+]      -> Delta = 0x%llx\r\n", Delta);
+
+        Relocation = &(DataDirectory(Src)[IMAGE_DIRECTORY_ENTRY_BASERELOC]);
+        BaseReloc = (VOID*)RVA_TO_VA(Dst, Relocation->VirtualAddress);
+        while (RelocSizeCounter < Relocation->Size)
+        {
+            RelocBlock = (PBASE_RELOCATION_BLOCK)((UINT64)BaseReloc + RelocSizeCounter);
+            RelocSizeCounter += sizeof(*RelocBlock);
+
+            RelocCount = (RelocBlock->BlockSize - sizeof(*RelocBlock)) / sizeof(*RelocEntry);
+            SerialPrint(L"[+]           -> entries = 0x%x\r\n", RelocCount);
+
+            RelocEntry = (PBASE_RELOCATION_ENTRY)((UINT64)BaseReloc + RelocSizeCounter);
+            for (UINT32 EntryCounter = 0; EntryCounter < RelocCount; EntryCounter++)
+            {
+                RelocSizeCounter += sizeof(*RelocEntry);
+
+                switch (RelocEntry[EntryCounter].Type)
+                {
+                case IMAGE_REL_BASED_ABSOLUTE:
+                    continue;
+                case IMAGE_REL_BASED_DIR64:
+                    Patch = (UINT64*)RVA_TO_VA(Dst, RelocBlock->PageAddress + RelocEntry[EntryCounter].Offset);
+                    SerialPrint(L"[+]                -> 0x%llx : 0x%llx => 0x%llx\r\n", Patch, *Patch, (*Patch + Delta));
+                    *Patch += Delta;
+                default:
+                    break;
+                }
+            }
         }
 
         Status = EFI_SUCCESS;

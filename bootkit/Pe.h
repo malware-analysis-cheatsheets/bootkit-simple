@@ -24,6 +24,35 @@
 
 #define SECTION_NAME_SIZE 8
 
+#define IMAGE_DIRECTORY_ENTRY_EXPORT          0   // Export Directory
+#define IMAGE_DIRECTORY_ENTRY_IMPORT          1   // Import Directory
+#define IMAGE_DIRECTORY_ENTRY_RESOURCE        2   // Resource Directory
+#define IMAGE_DIRECTORY_ENTRY_EXCEPTION       3   // Exception Directory
+#define IMAGE_DIRECTORY_ENTRY_SECURITY        4   // Security Directory
+#define IMAGE_DIRECTORY_ENTRY_BASERELOC       5   // Base Relocation Table
+#define IMAGE_DIRECTORY_ENTRY_DEBUG           6   // Debug Directory
+//      IMAGE_DIRECTORY_ENTRY_COPYRIGHT       7   // (X86 usage)
+#define IMAGE_DIRECTORY_ENTRY_ARCHITECTURE    7   // Architecture Specific Data
+#define IMAGE_DIRECTORY_ENTRY_GLOBALPTR       8   // RVA of GP
+#define IMAGE_DIRECTORY_ENTRY_TLS             9   // TLS Directory
+#define IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG    10   // Load Configuration Directory
+#define IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT   11   // Bound Import Directory in headers
+#define IMAGE_DIRECTORY_ENTRY_IAT            12   // Import Address Table
+#define IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13   // Delay Load Import Descriptors
+#define IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   // COM Runtime descriptor
+
+#define IMAGE_REL_BASED_ABSOLUTE              0
+#define IMAGE_REL_BASED_HIGH                  1
+#define IMAGE_REL_BASED_LOW                   2
+#define IMAGE_REL_BASED_HIGHLOW               3
+#define IMAGE_REL_BASED_HIGHADJ               4
+#define IMAGE_REL_BASED_MACHINE_SPECIFIC_5    5
+#define IMAGE_REL_BASED_RESERVED              6
+#define IMAGE_REL_BASED_MACHINE_SPECIFIC_7    7
+#define IMAGE_REL_BASED_MACHINE_SPECIFIC_8    8
+#define IMAGE_REL_BASED_MACHINE_SPECIFIC_9    9
+#define IMAGE_REL_BASED_DIR64                 10
+
 
 #define RVA_TO_VA(base, rva) ((UINT64)base + rva)
 
@@ -132,6 +161,19 @@ typedef struct _IMAGE_SECTION_HEADER
     ULONG Characteristics;                                                  //0x24
 }IMAGE_SECTION_HEADER, * PIMAGE_SECTION_HEADER;
 
+typedef struct BASE_RELOCATION_BLOCK
+{
+    DWORD PageAddress;
+    DWORD BlockSize;
+} BASE_RELOCATION_BLOCK, * PBASE_RELOCATION_BLOCK;
+
+typedef struct BASE_RELOCATION_ENTRY
+{
+    USHORT Offset : 12;
+    USHORT Type : 4;
+} BASE_RELOCATION_ENTRY, * PBASE_RELOCATION_ENTRY;
+
+
 /**
  * @brief イメージがメモリに読み込まれるときのイメージのサイズ
  * @param Base[in] peのベースアドレス
@@ -162,3 +204,10 @@ EFI_STATUS PeHeader(VOID* Dst, VOID* Src);
  * @param Src[in] PEのベースアドレス
  */
 EFI_STATUS PeSections(VOID* Dst, VOID* Src);
+
+/**
+ * @breif ASLRの影響でベースアドレスが変更されたアドレスを再配置する
+ * @param Dst[in] 書き込み先のベースアドレス
+ * @param Src[in] PEのベースアドレス
+ */
+EFI_STATUS PeRelocation(VOID* Dst, VOID* Src);
