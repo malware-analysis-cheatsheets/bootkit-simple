@@ -15,6 +15,11 @@
 
 #define MAX(a, b) (((a) < (b)) ? (b) : (a))
 
+UINT64 GetEntryPoint(VOID* Base)
+{
+    return OptionalHeader(Base).AddressOfEntryPoint;
+}
+
 INT32 GetImageSize(VOID* Base)
 {
     if (Base == NULL)

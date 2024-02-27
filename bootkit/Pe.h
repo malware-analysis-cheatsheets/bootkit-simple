@@ -220,6 +220,12 @@ typedef struct _IMAGE_EXPORT_DIRECTORY
 
 
 /**
+ * @brief エントリーポイントを取得
+ * @param Base[in] peのベースアドレス
+ */
+UINT64 GetEntryPoint(VOID* Base);
+
+/**
  * @brief イメージがメモリに読み込まれるときのイメージのサイズ
  * @param Base[in] peのベースアドレス
  * @retval イメージのサイズ
