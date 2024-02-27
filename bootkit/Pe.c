@@ -57,6 +57,90 @@ INT32 GetSectionHeader(VOID* Base, PIMAGE_SECTION_HEADER* SectionHeader)
     return NumberOfSection;
 }
 
+char* strstr(const char* str1, const char* str2)
+{
+    unsigned int i, j, k;
+    for (i = j = k = 0; str2[j] != '\0'; i++)
+    {
+        if (str1[i] == '\0')return '\0';
+        for (j = 0, k = i; str2[j] != '\0' && str1[i + j] == str2[j]; j++);
+    }
+    return (char*)&str1[k];
+}
+
+UINT64 GetExport(CHAR8* Base, CHAR8* ExportName, BOOLEAN IsStrStr)
+{
+    UINT64 Status = 0;
+
+    PIMAGE_DOS_HEADER DosHeader = NULL;
+    PIMAGE_NT_HEADERS64 NtHeaders = NULL;
+    ULONG ExportRva = 0;
+    PIMAGE_EXPORT_DIRECTORY Exports = NULL;
+    ULONG* NameRva = NULL;
+    CHAR8* Func = NULL;
+    ULONG* FuncRva = NULL;
+    WORD* OrdinalRva = NULL;
+
+    do
+    {
+        if (Base == NULL || ExportName == NULL)
+        {
+            break;
+        }
+
+        DosHeader = (PIMAGE_DOS_HEADER)Base;
+        if (DosHeader->e_magic != IMAGE_DOS_SIGNATURE)
+        {
+            break;
+        }
+
+        NtHeaders = (PIMAGE_NT_HEADERS64)RVA_TO_VA(Base, DosHeader->e_lfanew);
+        if (NtHeaders->Signature != IMAGE_PE_SIGNATURE)
+        {
+            break;
+        }
+
+        ExportRva = NtHeaders->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+        if (!ExportRva)
+        {
+            break;
+        }
+
+        Exports = (PIMAGE_EXPORT_DIRECTORY)RVA_TO_VA(Base, ExportRva);
+        NameRva = (ULONG*)RVA_TO_VA(Base, Exports->AddressOfNames);
+
+        for (ULONG i = 0; i < Exports->NumberOfNames; i++)
+        {
+            Func = (CHAR8*)RVA_TO_VA(Base, NameRva[i]);
+
+            if (IsStrStr)
+            {
+                if (strstr(Func, ExportName))
+                {
+                    FuncRva = (ULONG*)RVA_TO_VA(Base, Exports->AddressOfFunctions);
+                    OrdinalRva = (WORD*)RVA_TO_VA(Base, Exports->AddressOfNameOrdinals);
+
+                    Status = RVA_TO_VA(Base, FuncRva[OrdinalRva[i]]);
+                    break;
+                }
+            }
+            else
+            {
+                if (strcmpa(Func, ExportName) == 0)
+                {
+                    FuncRva = (ULONG*)RVA_TO_VA(Base, Exports->AddressOfFunctions);
+                    OrdinalRva = (WORD*)RVA_TO_VA(Base, Exports->AddressOfNameOrdinals);
+
+                    Status = RVA_TO_VA(Base, FuncRva[OrdinalRva[i]]);
+                    break;
+                }
+            }
+        }
+    } while (FALSE);
+
+    return Status;
+}
+
 // =====================================================================================
 EFI_STATUS PeHeader(VOID* Dst, VOID* Src)
 {
@@ -198,6 +282,72 @@ EFI_STATUS PeRelocation(VOID* Dst, VOID* Src)
         }
 
         Status = EFI_SUCCESS;
+    } while (FALSE);
+
+    return Status;
+}
+
+EFI_STATUS PeIat(VOID* Dst, VOID* Src, VOID* Ntoskrnl)
+{
+    EFI_STATUS Status = EFI_SUCCESS;
+
+    PIMAGE_DATA_DIRECTORY Imports = NULL;
+    PIMAGE_IMPORT_DESCRIPTOR ImportDescriptor = NULL;
+    CHAR8* LibName = NULL;
+    VOID* Library = NULL;
+    PIMAGE_THUNK_DATA64 Thunk = NULL;
+    UINT64 Func = 0;
+    CHAR8* FuncOrdinal = NULL;
+    PIMAGE_IMPORT_BY_NAME FuncName = NULL;
+
+    do
+    {
+        if (Dst == NULL || Src == NULL)
+        {
+            Status = EFI_INVALID_PARAMETER;
+            break;
+        }
+
+        Imports = &DataDirectory(Src)[IMAGE_DIRECTORY_ENTRY_IMPORT];
+        ImportDescriptor = (PIMAGE_IMPORT_DESCRIPTOR)RVA_TO_VA(Dst, Imports->VirtualAddress);
+
+        while (ImportDescriptor->Name != 0)
+        {
+            LibName = (CHAR8*)RVA_TO_VA(Dst, ImportDescriptor->Name);
+            if (strcmpa(LibName, "ntoskrnl.exe") != 0)
+            {
+                Status = EFI_NOT_FOUND;
+                break;
+            }
+
+            SerialPrint(L"[+]      -> Name = ");
+            for (UINT32 i = 0; i < strlena(LibName); i++)
+            {
+                if (LibName[i] == 0)
+                {
+                    break;
+                }
+
+                SerialPrint(L"%c", LibName[i]);
+            }
+            SerialPrint(L"\r\n");
+
+            Thunk = (PIMAGE_THUNK_DATA64)RVA_TO_VA(Dst, ImportDescriptor->FirstThunk);
+            while (Thunk->u1.AddressOfData != 0)
+            {
+                Func = 0;
+
+                FuncName = (PIMAGE_IMPORT_BY_NAME)RVA_TO_VA(Dst, Thunk->u1.AddressOfData);
+                Func = GetExport(Ntoskrnl, FuncName->Name, FALSE);
+                SerialPrint(L"[+]           -> 0x%llx\r\n", Func);
+
+                Thunk->u1.Function = Func;
+
+                Thunk++;
+            }
+
+            ImportDescriptor++;
+        }
     } while (FALSE);
 
     return Status;

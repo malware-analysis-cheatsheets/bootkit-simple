@@ -83,6 +83,12 @@ EFI_STATUS MapDriver(VOID* BaseNtoskrnl, VOID** EntryPoint, VOID* EntryPointTarg
 
         // IAT解決
         SerialPrint(L"[+] Resolve the IAT\r\n");
+        Status = PeIat(BaseDriver, BufferDriver, BaseNtoskrnl);
+        if (EFI_ERROR(Status))
+        {
+            SerialPrint(L"[-] Failed to resolve the IAT\r\n");
+            break;
+        }
     } while (FALSE);
 
     return Status;

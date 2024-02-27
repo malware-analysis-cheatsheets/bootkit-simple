@@ -173,6 +173,51 @@ typedef struct BASE_RELOCATION_ENTRY
     USHORT Type : 4;
 } BASE_RELOCATION_ENTRY, * PBASE_RELOCATION_ENTRY;
 
+typedef struct _IMAGE_IMPORT_DESCRIPTOR
+{
+    union
+    {
+        DWORD Characteristics;
+        DWORD OriginalFirstThunk;
+    } DUMMYUNIONNAME;
+    DWORD TimeDateStamp;
+    DWORD ForwarderChain;
+    DWORD Name;
+    DWORD FirstThunk;
+} IMAGE_IMPORT_DESCRIPTOR, * PIMAGE_IMPORT_DESCRIPTOR;
+
+typedef struct _IMAGE_THUNK_DATA64
+{
+    union
+    {
+        ULONGLONG ForwarderString;
+        ULONGLONG Function;
+        ULONGLONG Ordinal;
+        ULONGLONG AddressOfData;
+    } u1;
+} IMAGE_THUNK_DATA64, * PIMAGE_THUNK_DATA64;
+
+typedef struct _IMAGE_IMPORT_BY_NAME
+{
+    WORD Hint;
+    CHAR Name[1];
+} IMAGE_IMPORT_BY_NAME, * PIMAGE_IMPORT_BY_NAME;
+
+typedef struct _IMAGE_EXPORT_DIRECTORY
+{
+    DWORD   Characteristics;
+    DWORD   TimeDateStamp;
+    WORD    MajorVersion;
+    WORD    MinorVersion;
+    DWORD   Name;
+    DWORD   Base;
+    DWORD   NumberOfFunctions;
+    DWORD   NumberOfNames;
+    DWORD   AddressOfFunctions;     // RVA from base of image
+    DWORD   AddressOfNames;         // RVA from base of image
+    DWORD   AddressOfNameOrdinals;  // RVA from base of image
+} IMAGE_EXPORT_DIRECTORY, * PIMAGE_EXPORT_DIRECTORY;
+
 
 /**
  * @brief イメージがメモリに読み込まれるときのイメージのサイズ
@@ -188,6 +233,14 @@ INT32 GetImageSize(VOID* Base);
  * @retval セクションの数
  */
 INT32 GetSectionHeader(VOID* Base, PIMAGE_SECTION_HEADER* SectionHeader);
+
+/**
+ * @brief エクスポートを探す
+ * @param Base[in] peのベースアドレス
+ * @param ExportName[in] エクスポート名
+ * @param IsStrStr[in] TRUEの場合はstrstr、FALSEの場合strcmp
+ */
+UINT64 GetExport(CHAR8* Base, CHAR8* ExportName, BOOLEAN IsStrStr);
 
 
 // =====================================================================================
@@ -211,3 +264,11 @@ EFI_STATUS PeSections(VOID* Dst, VOID* Src);
  * @param Src[in] PEのベースアドレス
  */
 EFI_STATUS PeRelocation(VOID* Dst, VOID* Src);
+
+/**
+ * @breif インポートアドレスを解決する
+ * @param Dst[in] 書き込み先のベースアドレス
+ * @param Src[in] PEのベースアドレス
+ * @param Ntoskrnl[in] ntoskrnl.exeのベースアドレス
+ */
+EFI_STATUS PeIat(VOID* Dst, VOID* Src, VOID* Ntoskrnl);
