@@ -14,7 +14,7 @@ extern MAP_INFO Mapper;
 
 // エントリーポイントへ戻れるように、
 // 第3引数(r8)にエントリーポイント(ターゲットモジュール)のアドレスを保持する
-CONST CHAR8 TargetModuleOfEntryPoint[] = {
+CONST CHAR8 HoldTargetModuleOfEntryPoint[] = {
     0x4C, 0x8D, 0x05, 0xF9, 0xFF, 0xFF, 0xFF,                   // lea r8, [rip - 7]
 };
 
@@ -124,6 +124,11 @@ EFI_STATUS SetupDriver(PKLDR_DATA_TABLE_ENTRY Ntoskrnl, PKLDR_DATA_TABLE_ENTRY T
             SerialPrint(L"[-] Failed to map the driver\r\n");
             break;
         }
+
+        // エントリーの命令を書き換える
+        CopyMem(TargetModule->EntryPoint, HoldTargetModuleOfEntryPoint, INSTRUCTION_SIZE);
+        // ドライバへ処理を移る命令を書き込む
+        TrampolineHook(DriverEntryPoint, (UINT8*)TargetModule->EntryPoint + INSTRUCTION_SIZE, NULL, FALSE);
 
         Status = EFI_SUCCESS;
     } while (FALSE);

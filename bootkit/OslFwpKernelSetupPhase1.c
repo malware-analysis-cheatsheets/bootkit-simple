@@ -104,7 +104,12 @@ EFI_STATUS EFIAPI HookedOslFwpKernelSetupPhase1(LOADER_PARAMETER_BLOCK* LoaderPa
         SerialPrint(L"[+]      -> ImageSize = 0x%llx\r\n", TargetModule->SizeOfImage);
         SerialPrint(L"[+]      -> EntryPoint = 0x%llx\r\n", TargetModule->EntryPoint);
 
-        SetupDriver(Ntoskrnl, TargetModule);
+        if (EFI_ERROR(SetupDriver(Ntoskrnl, TargetModule)))
+        {
+            SerialPrint(L"[-] Failed to setup driver\r\n");
+            break;
+        }
+        SerialPrint(L"[+] Success!!\r\n");
     } while (FALSE);
 
     return OslFwpKernelSetupPhase1(LoaderParameterBlock);
