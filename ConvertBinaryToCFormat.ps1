@@ -1,6 +1,6 @@
 $CurrentPath = Convert-Path .;
 $DriverPath = $CurrentPath + "\..\x64\Debug\driver.sys";
-$HeaderPath = $CurrentPath + "\..\bootkit\BinDriver.h";
+$HeaderPath = $CurrentPath + "\..\bootkit-simple\BinDriver.h";
 [byte[]] $BinDriver = Get-Content $DriverPath -Encoding Byte;
 
 $WriteData = "#pragma once`r`n#include <efi.h>`r`n`r`nstatic UINT8 DriverBinary[] =`r`n{`r`n";

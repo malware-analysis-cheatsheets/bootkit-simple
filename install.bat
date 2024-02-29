@@ -7,7 +7,7 @@ if %errorlevel% neq 0 (
 
 setlocal
 
-set FileName=bootkit.efi
+set FileName=bootkit-simple.efi
 set UefiName=uefi.efi
 set FilePath=%USERPROFILE%\Desktop\%FileName%
 
