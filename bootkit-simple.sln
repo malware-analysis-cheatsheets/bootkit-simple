@@ -12,24 +12,53 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gnu-efi", "gnu-efi-vcxproj\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "driver", "driver\driver.vcxproj", "{9F1CA427-E7D2-4339-A79A-E9DD533487C2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bootkit-simple2", "bootkit-simple2\bootkit-simple2.vcxproj", "{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3135D563-9596-4584-9ED6-616ADEC52974} = {3135D563-9596-4584-9ED6-616ADEC52974}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{DFA0BA98-D0BA-4176-9A34-B5BA6355B1DE}.Debug|x64.ActiveCfg = Debug|x64
 		{DFA0BA98-D0BA-4176-9A34-B5BA6355B1DE}.Debug|x64.Build.0 = Debug|x64
+		{DFA0BA98-D0BA-4176-9A34-B5BA6355B1DE}.Debug|x86.ActiveCfg = Debug|x64
+		{DFA0BA98-D0BA-4176-9A34-B5BA6355B1DE}.Debug|x86.Build.0 = Debug|x64
 		{DFA0BA98-D0BA-4176-9A34-B5BA6355B1DE}.Release|x64.ActiveCfg = Release|x64
 		{DFA0BA98-D0BA-4176-9A34-B5BA6355B1DE}.Release|x64.Build.0 = Release|x64
+		{DFA0BA98-D0BA-4176-9A34-B5BA6355B1DE}.Release|x86.ActiveCfg = Release|x64
+		{DFA0BA98-D0BA-4176-9A34-B5BA6355B1DE}.Release|x86.Build.0 = Release|x64
 		{3135D563-9596-4584-9ED6-616ADEC52974}.Debug|x64.ActiveCfg = Debug|x64
 		{3135D563-9596-4584-9ED6-616ADEC52974}.Debug|x64.Build.0 = Debug|x64
+		{3135D563-9596-4584-9ED6-616ADEC52974}.Debug|x86.ActiveCfg = Debug|x64
+		{3135D563-9596-4584-9ED6-616ADEC52974}.Debug|x86.Build.0 = Debug|x64
 		{3135D563-9596-4584-9ED6-616ADEC52974}.Release|x64.ActiveCfg = Release|x64
 		{3135D563-9596-4584-9ED6-616ADEC52974}.Release|x64.Build.0 = Release|x64
+		{3135D563-9596-4584-9ED6-616ADEC52974}.Release|x86.ActiveCfg = Release|x64
+		{3135D563-9596-4584-9ED6-616ADEC52974}.Release|x86.Build.0 = Release|x64
 		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Debug|x64.ActiveCfg = Debug|x64
 		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Debug|x64.Build.0 = Debug|x64
+		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Debug|x86.ActiveCfg = Debug|x64
+		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Debug|x86.Build.0 = Debug|x64
+		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Debug|x86.Deploy.0 = Debug|x64
 		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Release|x64.ActiveCfg = Release|x64
 		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Release|x64.Build.0 = Release|x64
+		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Release|x86.ActiveCfg = Release|x64
+		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Release|x86.Build.0 = Release|x64
+		{9F1CA427-E7D2-4339-A79A-E9DD533487C2}.Release|x86.Deploy.0 = Release|x64
+		{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}.Debug|x64.ActiveCfg = Debug|x64
+		{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}.Debug|x64.Build.0 = Debug|x64
+		{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}.Debug|x86.ActiveCfg = Debug|Win32
+		{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}.Debug|x86.Build.0 = Debug|Win32
+		{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}.Release|x64.ActiveCfg = Release|x64
+		{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}.Release|x64.Build.0 = Release|x64
+		{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}.Release|x86.ActiveCfg = Release|Win32
+		{758D6585-AC7B-4EA6-AC99-0DC2AEFD4C9A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
