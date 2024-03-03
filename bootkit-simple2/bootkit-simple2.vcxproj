@@ -113,6 +113,7 @@
     <ClCompile Include="ExitBootServices.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="Mapper.c" />
+    <ClCompile Include="OslArchTransferToKernel.c" />
     <ClCompile Include="Pe.c" />
     <ClCompile Include="Print.c" />
     <ClCompile Include="Serial.c" />
@@ -123,13 +124,17 @@
     <ClInclude Include="Bootmgfw.h" />
     <ClInclude Include="ExitBootServices.h" />
     <ClInclude Include="Mapper.h" />
+    <ClInclude Include="OslArchTransferToKernel.h" />
     <ClInclude Include="Pe.h" />
     <ClInclude Include="Print.h" />
     <ClInclude Include="Serial.h" />
     <ClInclude Include="Trampoline.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AsmExitBootServices.asm" />
+    <MASM Include="AsmExitBootServices.asm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </MASM>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -12,6 +12,7 @@ extern EFI_EXIT_BOOT_SERVICES OriginalExitBootServices;
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 {
     EFI_STATUS Status;
+    UINTN Event;
 
     EFI_DEVICE_PATH* BootmgrPath = NULL;
     EFI_HANDLE BootmgrHandle;
@@ -60,8 +61,12 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         PrintLoadedImageInfo(&BootmgrHandle);
 
         // ExitBootServicesをフック
-        OriginalExitBootServices = SetServicePointer((VOID*)&gBS->ExitBootServices, &HookedExitBootServices, TRUE);
+        OriginalExitBootServices = SetServicePointer((VOID*)&gBS->ExitBootServices, _ExitBootServices, TRUE);
         Print(L"[+] Original ExitBootServices is 0x%llx\n", OriginalExitBootServices);
+
+        Print(L"\n%EPress any key to start winload.efi.%N\n");
+        gST->ConIn->Reset(gST->ConIn, FALSE);
+        gBS->WaitForEvent(1, &gST->ConIn->WaitForKey, &Event);
 
         // bootmgfw.efiを実行する
         Status = gBS->StartImage(BootmgrHandle, NULL, NULL);

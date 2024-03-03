@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <efi.h>
 
 VOID* SetServicePointer(IN OUT VOID** ServiceTableFunction, IN VOID* NewFunction, BOOLEAN IsTpl);

@@ -1,14 +1,14 @@
 .code
 
-PUBLIC _ExitBootServices
+public _ExitBootServices
 
-EXTERN RetExitBootServices : QWORD
-EXTERN HookedExitBootServices : PROC
+extern RetExitBootServices : qword
+extern HookedExitBootServices : proc
 
-_ExitBootServices PROC
+_ExitBootServices proc
     mov rax, [rsp]
     mov RetExitBootServices, rax
     jmp HookedExitBootServices
-_ExitBootServices ENDP
+_ExitBootServices endp
 
 END

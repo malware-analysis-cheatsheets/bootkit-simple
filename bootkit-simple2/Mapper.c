@@ -10,7 +10,7 @@
 // ターゲットモジュールの元データを渡す
 #define EXPORT_NAME_FROM_DRIVER "MapperData"
 
-extern MAP_INFO Mapper;
+MAP_INFO Mapper = { 0 };
 
 // エントリーポイントへ戻れるように、
 // 第3引数(r8)にエントリーポイント(ターゲットモジュール)のアドレスを保持する

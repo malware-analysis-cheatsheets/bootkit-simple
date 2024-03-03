@@ -38,6 +38,9 @@
     <ClCompile Include="ExitBootServices.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OslArchTransferToKernel.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Print.h">
@@ -64,10 +67,13 @@
     <ClInclude Include="ExitBootServices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OslArchTransferToKernel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="AsmExitBootServices.asm">
+    <MASM Include="AsmExitBootServices.asm">
       <Filter>Source Files</Filter>
-    </None>
+    </MASM>
   </ItemGroup>
 </Project>

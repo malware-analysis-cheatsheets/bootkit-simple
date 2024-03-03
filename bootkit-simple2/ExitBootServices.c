@@ -1,4 +1,4 @@
-#include "ExitBootServices.h"
+ï»¿#include "ExitBootServices.h"
 #include "Pe.h"
 
 #include <efilib.h>
@@ -66,7 +66,7 @@ UINT64 FindBaseWinload(UINT64 Addr)
     return Status;
 }
 
-// winload.efi‚©‚çŒÄ‚Ño‚³‚êAƒu[ƒgƒT[ƒrƒX‚ðI—¹‚³‚¹‚é
+// winload.efiã‹ã‚‰å‘¼ã³å‡ºã•ã‚Œã€ãƒ–ãƒ¼ãƒˆã‚µãƒ¼ãƒ“ã‚¹ã‚’çµ‚äº†ã•ã›ã‚‹
 EFI_STATUS HookedExitBootServices(EFI_HANDLE ImageHandle, UINTN MapKey)
 {
     UINT64 BaseWinload = 0;
@@ -77,7 +77,7 @@ EFI_STATUS HookedExitBootServices(EFI_HANDLE ImageHandle, UINTN MapKey)
     {
         if (RetExitBootServices == 0)
         {
-            Print(L"[-] Failed to find return address of ExitBootServices\r\n");
+            Print(L"[-] Failed to find return address from ExitBootServices\r\n");
             break;
         }
         Print(L"[+] RetExitBootServices = 0x%llx\r\n", RetExitBootServices);
@@ -89,11 +89,11 @@ EFI_STATUS HookedExitBootServices(EFI_HANDLE ImageHandle, UINTN MapKey)
             break;
         }
         Print(L"[+] BaseWinload = 0x%llx\r\n", BaseWinload);
-
-        SetServicePointer((VOID**)&gBS->ExitBootServices, OriginalExitBootServices, FALSE);
-
-        gBS->Stall(2 * 1000000);
     } while (FALSE);
+
+    SetServicePointer((VOID**)&gBS->ExitBootServices, OriginalExitBootServices, FALSE);
+
+    gBS->Stall(2 * 1000000);
 
     return gBS->ExitBootServices(ImageHandle, MapKey);
 }
