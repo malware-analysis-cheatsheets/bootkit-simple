@@ -21,6 +21,7 @@ CONST CHAR8 HoldTargetModuleOfEntryPoint[] = {
 #define INSTRUCTION_SIZE 7
 #define HOOK_SIZE TRAMPOLINE_SIZE + INSTRUCTION_SIZE
 
+extern UINT64 VirtualAddress;
 
 /**
  * @brief ドライバを静的にマップする
@@ -49,7 +50,7 @@ EFI_STATUS MapDriver(VOID* BaseNtoskrnl, VOID** EntryPoint, VOID* EntryPointTarg
             break;
         }
 
-        BaseDriver = Mapper.AllocatedBuffer;
+        BaseDriver = (UINT8*)VirtualAddress;
         BufferDriver = DriverBinary;
 
         SerialPrint(L"[+] Driver Physical Memory = 0x%llx\r\n", BaseDriver);

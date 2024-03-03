@@ -41,6 +41,9 @@
     <ClCompile Include="OslArchTransferToKernel.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SetVirtualAddressMap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Print.h">
@@ -68,6 +71,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OslArchTransferToKernel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SetVirtualAddressMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

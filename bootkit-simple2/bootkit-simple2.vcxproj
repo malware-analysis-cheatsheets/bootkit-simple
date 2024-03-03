@@ -117,6 +117,7 @@
     <ClCompile Include="Pe.c" />
     <ClCompile Include="Print.c" />
     <ClCompile Include="Serial.c" />
+    <ClCompile Include="SetVirtualAddressMap.c" />
     <ClCompile Include="Trampoline.c" />
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +129,7 @@
     <ClInclude Include="Pe.h" />
     <ClInclude Include="Print.h" />
     <ClInclude Include="Serial.h" />
+    <ClInclude Include="SetVirtualAddressMap.h" />
     <ClInclude Include="Trampoline.h" />
   </ItemGroup>
   <ItemGroup>

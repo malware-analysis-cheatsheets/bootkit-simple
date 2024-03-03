@@ -1,5 +1,6 @@
 ﻿#include "ExitBootServices.h"
 #include "Pe.h"
+#include "OslArchTransferToKernel.h"
 
 #include <efilib.h>
 
@@ -89,6 +90,9 @@ EFI_STATUS HookedExitBootServices(EFI_HANDLE ImageHandle, UINTN MapKey)
             break;
         }
         Print(L"[+] BaseWinload = 0x%llx\r\n", BaseWinload);
+
+        // OslArchTransferToKernelをフック
+        SetupOslArchTransferToKernel((VOID*)BaseWinload);
     } while (FALSE);
 
     SetServicePointer((VOID**)&gBS->ExitBootServices, OriginalExitBootServices, FALSE);
@@ -97,4 +101,3 @@ EFI_STATUS HookedExitBootServices(EFI_HANDLE ImageHandle, UINTN MapKey)
 
     return gBS->ExitBootServices(ImageHandle, MapKey);
 }
-
