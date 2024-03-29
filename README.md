@@ -5,7 +5,7 @@ Windows用のBootkitを作成した。
 
 ## 詳細
 
-悪意のあるドライバをロードするためには以下が必要になる
+悪意のあるドライバをロードするためには以下が必要になる。
 
 1. bootmgfw.efiをロード、実行
 2. winload.efiのベースアドレスを取得
@@ -49,14 +49,14 @@ Windows用のBootkitを作成した。
 
 ## インストール手順
 
-1. デスクトップ上にビルドしたefiファイルとinstall.batを設置する
-2. install.batを管理者権限で実行する
-3. 管理者権限のコマンドプロンプトを起動する
-4. 以下を実行する
+1. デスクトップ上にビルドしたefiファイルとinstall.batを設置する。
+2. install.batを管理者権限で実行する。
+3. 管理者権限のコマンドプロンプトを起動する。
+4. 以下を実行する。
    ```cmd
    bcdedit.exe /set "{bootmgr}" path uefi.efi
    ```
-5. 再起動する
+5. 再起動する。
 
 
 ## デバッグ
@@ -70,7 +70,7 @@ bcdedit /debug <on/off>  // カーネルデバッグ
 
 ### 2. シリアルデバッグ出力
 
-管理者権限のコマンドプロンプトで以下を実行することで、シリアル出力ができる
+管理者権限のコマンドプロンプトで以下を実行することで、シリアル出力ができる。
 ```
 bcdedit /dbgsettings serial debugport:1 baudrate:115200  // Set-VMComPortで設定したNumberとdebugportは同じにする必要がある
 ```
@@ -81,30 +81,30 @@ Set-VMComPort -VMName "win11" -Path "\\.\pipe\serail_1" -Number 1  // Hyper-Vに
 Get-VMComPort -VMname <vm name>  // Hyper-Vのシリアルを確認
 ```
 
-PuTTYのCUIを使って、管理者権限のコマンドプロンプトに出力する
+PuTTYのCUIを使って、管理者権限のコマンドプロンプトに出力する。
 ```
 plink.exe -serial \\.\pipe\serial_1 -sercfg 115200,8,1,N,N
 ```
 
 ### 3. WinDbg
 
-前提として、「1. bootmgr・winload・kernelをデバッグするコマンド」でデバッグしたいターゲットを有効にする必要がある
+前提として、「1. bootmgr・winload・kernelをデバッグするコマンド」でデバッグしたいターゲットを有効にする必要がある。
 
 #### bootmgr
 
-`OptionalHeader.ImageBase`にロードされるため、IDA Freeで解析したときにアドレスにブレークポイントをセットする
+`OptionalHeader.ImageBase`にロードされるため、IDA Freeで解析したときにアドレスにブレークポイントをセットする。
 
 #### winload
 
 
 #### kernel
 
-ターゲットモジュールのエントリーポイントをフックコマンド
+ターゲットモジュールのエントリーポイントをフックコマンド。
 ```
 bu <TargetModule> + <RVA:EntryPoint>
 ```
 
-プロジェクトでは`disk.sys`を使っており、このモジュールのエントリーポイントをフックする
+プロジェクトでは`disk.sys`を使っており、このモジュールのエントリーポイントをフックする。
 ```
 bu disk + 0x1080
 ```
@@ -117,3 +117,8 @@ bu disk + 0x1080
 - https://github.com/Cr4sh/s6_pcie_microblaze
 - https://github.com/RobinFassinaMoschiniForks/bootdoor/tree/master
 - http://blog.leanote.com/post/only_the_brave/Windows%E5%88%9D%E5%A7%8B%E5%8C%96%E8%BF%87%E7%A8%8B-%E4%BA%8C
+
+## 開発メンバー
+- Cha1aza([Twitter](https://twitter.com/Cha1aza), [GitHub](https://github.com/cha1aza))
+- mi2([Twitter](https://twitter.com/3ts75), [GitHub](https://github.com/3ts75))
+- ry0kvn([Twitter](https://twitter.com/ry0kvn), [GitHub](https://github.com/ry0kvn))
